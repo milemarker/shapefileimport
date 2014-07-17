@@ -2,8 +2,8 @@ __author__ = 'djvdorp'
 import shapefile
 import pyproj
 
-hectopunten_shp = shapefile.Reader("01-07-2014/Hectopunten/Hectopunten")
-hectopunten_shapes = hectopunten_shp.shapes()
+hectopunten_input_reader = shapefile.Reader("01-07-2014/Hectopunten/Hectopunten")
+hectopunten_input_shapeRecords = hectopunten_input_reader.shapeRecords()
 #print len(hectopunten_shapes)
 
 #wegvakken_shp = shapefile.Reader("01-07-2014/Wegvakken/Wegvakken")
@@ -15,7 +15,7 @@ output_projection = pyproj.Proj("+init=EPSG:4326") # LatLon with WGS84 datum use
 
 index = 0
 while index < 100:
-    for input_point in hectopunten_shapes[index].points:
+    for input_point in hectopunten_input_shapeRecords[index].shape.points:
         input_x = input_point[0]
         input_y = input_point[1]
 
