@@ -20,6 +20,8 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
     input_projection = pyproj.Proj(src_projection)
     output_projection = pyproj.Proj(dest_projection)
 
+    print "shapeType read: {}".format(r.shapeType)
+
     # Create a shapefile writer using the same shape type as our reader
     w = shapefile.Writer(r.shapeType)
 
