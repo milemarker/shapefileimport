@@ -11,7 +11,7 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
     if not nr_of_shapes_to_process:
         nr_of_shapes_to_process = nr_of_shapes_in_file
 
-    print "{} shapes in file '{}'".format(nr_of_shapes_in_file, input_filename)
+    print "{} of the {} shapes in file '{}' will be transformed".format(nr_of_shapes_to_process, nr_of_shapes_in_file, input_filename)
 
     # Show fields to verify input
     fields = r.fields
@@ -22,6 +22,10 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
 
     # Create a shapefile writer using the same shape type as our reader
     w = shapefile.Writer(r.shapeType)
+
+    # Because every shape must have a corresponding record it is critical that
+    # the number of records equals the number of shapes to create a valid shapefile.
+    w.autoBalance = 1
 
     # Copy over the existing dbf fields
     w.fields = list(r.fields)
