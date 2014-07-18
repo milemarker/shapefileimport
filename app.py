@@ -36,21 +36,15 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
     w.records.extend(r.records())
 
     index = 0
-    while index < nr_of_shapes_to_process:
+    while index <= (nr_of_shapes_to_process - 1):
         for input_point in shapes[index].shape.points:
             input_x = input_point[0]
             input_y = input_point[1]
 
-            #print "===================="
-            #print "--- INPUT (Rijksdriehoekstelsel_New): ---"
-            #print '({:-f}, {:-f})'.format(input_x, input_y)
-
             # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
             x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
 
-            #print "--- OUTPUT (WGS84): ---"
-            #print '({:-f}, {:-f})'.format(x, y)
-            #print "====================\n"
+            print 'Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y)
 
             # Add the translated point to the new shapefile (output) to save it
             w.point(x, y)
