@@ -14,8 +14,8 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
     print "{} of the {} shapes in file '{}' will be transformed".format(nr_of_shapes_to_process, nr_of_shapes_in_file, input_filename)
 
     # Show fields to verify input
-    fields = r.fields
-    print fields
+    field_names = [str(i[0]) for i in r.fields]
+    print field_names
 
     input_projection = pyproj.Proj(src_projection)
     output_projection = pyproj.Proj(dest_projection)
