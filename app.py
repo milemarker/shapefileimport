@@ -2,16 +2,15 @@ __author__ = 'djvdorp'
 import shapefile
 import pyproj
 
+import csv
 
-def shp_transform_to_different_projection(file_name, src_projection, dest_projection, nr_of_shapes_to_process=None):
+
+def shp_transform_to_different_projection(file_name, src_projection, dest_projection):
     r = shapefile.Reader(file_name)
-    shapes = r.shapeRecords()
+    input_shapes = r.shapeRecords()
 
-    nr_of_shapes_in_file = len(shapes)
-    if not nr_of_shapes_to_process:
-        nr_of_shapes_to_process = nr_of_shapes_in_file
-
-    print "{} of the {} shapes in file '{}' will be transformed".format(nr_of_shapes_to_process, nr_of_shapes_in_file, input_filename)
+    nr_of_shapes_in_file = len(input_shapes)
+    print "{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_filename)
 
     # Show fields to verify input
     field_names = [str(i[0]) for i in r.fields]
@@ -35,23 +34,34 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
     # Copy over the existing dbf records
     w.records.extend(r.records())
 
-    index = 0
-    while index <= (nr_of_shapes_to_process - 1):
-        for input_point in shapes[index].shape.points:
-            input_x = input_point[0]
-            input_y = input_point[1]
+    result = []
 
-            # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
-            x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
+    for input_shape in input_shapes:
+        input_x = input_shape.shape.points[0][0]
+        input_y = input_shape.shape.points[0][1]
 
-            print 'Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y)
+        # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
+        x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
 
-            # Add the translated point to the new shapefile (output) to save it
-            w.point(x, y)
-        index += 1
+        print 'Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y)
+
+        # Add the translated point to the new shapefile (output) to save it
+        #w.point(x, y)
+
+        result.append({'x': x, 'y': y})
 
     # Save output file to new shapefile
-    w.save("transformed")
+    #w.save("transformed")
+    csv_dict_writer("transformed.csv", ['x', 'y'], result)
+
+
+def csv_dict_writer(path, fieldnames, data):
+    test_file = open(path,'wb')
+    csvwriter = csv.DictWriter(test_file, delimiter=',', fieldnames=fieldnames)
+    csvwriter.writerow(dict((fn,fn) for fn in fieldnames))
+    for row in data:
+         csvwriter.writerow(row)
+    test_file.close()
 
 
 # Real action here
@@ -59,4 +69,4 @@ input_filename = "01-07-2014/Hectopunten/Hectopunten"  # of "01-07-2014/Hectopun
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
-shp_transform_to_different_projection(input_filename, input_projection_string, output_projection_string, 1)
+shp_transform_to_different_projection(input_filename, input_projection_string, output_projection_string)
