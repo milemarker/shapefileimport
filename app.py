@@ -34,6 +34,8 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
     # Copy over the existing dbf records
     w.records.extend(r.records())
 
+    # @DaanDebie: welke structuur zou de csv writer van python willen?
+    # Zie: https://docs.python.org/2/library/csv.html#writer-objects
     result = []
 
     for input_shape in input_shapes:
@@ -48,13 +50,18 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
         # Add the translated point to the new shapefile (output) to save it
         #w.point(x, y)
 
+        # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
         result.append({'x': x, 'y': y})
 
     # Save output file to new shapefile
     #w.save("transformed")
+
+    # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
+    # Ze zijn immers ook in de entries van result (result.append() bekend?
     csv_dict_writer("transformed.csv", ['x', 'y'], result)
 
 
+# @DaanDebie: dit is een hacky mixup van online csv tutorials in een poging om csv writing werkend te krijgen, be warned.
 def csv_dict_writer(path, fieldnames, data):
     test_file = open(path,'wb')
     csvwriter = csv.DictWriter(test_file, delimiter=',', fieldnames=fieldnames)
@@ -65,6 +72,7 @@ def csv_dict_writer(path, fieldnames, data):
 
 
 # Real action here
+# Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
 input_filename = "01-07-2014/Hectopunten/Hectopunten"  # of "01-07-2014/Hectopunten/Hectopunten"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
