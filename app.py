@@ -5,8 +5,10 @@ import pyproj
 import csv
 from collections import OrderedDict
 
+HECTOPUNTEN_FIELDS = OrderedDict([('HECTOMTRNG', 0), ('AFSTAND', 1), ('WVK_ID', 2), ('WVK_BEGDAT', 3)])
 
-def shp_transform_to_different_projection(input_path, src_projection, dest_projection, output_filename):
+
+def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
 
@@ -39,14 +41,16 @@ def shp_transform_to_different_projection(input_path, src_projection, dest_proje
         #print [str(i) for i in input_record]
 
         # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
-        result_entry = OrderedDict([
-            ('HECTOMTRNG', input_record[0]),
-            ('AFSTAND', input_record[1]),
-            ('WVK_ID', input_record[2]),
-            ('WVK_BEGDAT', int_array_to_string(input_record[3])),
-            ('longitude', x),
-            ('latitude', y)
-        ])
+        result_entry = OrderedDict()
+        for key, value in input_fields.items():
+            input_entry = input_record[value]
+            if isinstance(input_entry, list):
+                input_entry = int_array_to_string(input_entry)
+            result_entry[key] = input_entry
+
+            result_entry['longitude'] = x
+            result_entry['latitude'] = y
+        
         result.append(result_entry)
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
@@ -82,4 +86,5 @@ input_wegvakken = "01-07-2014/Wegvakken/Wegvakken"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
-shp_transform_to_different_projection(input_hectopunten, input_projection_string, output_projection_string, "output/Hectopunten.csv")
+shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
+
