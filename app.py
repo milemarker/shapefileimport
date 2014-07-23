@@ -1,7 +1,9 @@
 __author__ = 'djvdorp'
 import shapefile
 import pyproj
+
 import csv
+from collections import OrderedDict
 
 
 def shp_transform_to_different_projection(file_name, src_projection, dest_projection):
@@ -50,7 +52,8 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
         #w.point(x, y)
 
         # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
-        result.append({'longitude': x, 'latitude': y})
+        result_entry = OrderedDict([('longitude', x), ('latitude', y)])
+        result.append(result_entry)
 
     # Save output file to new shapefile
     #w.save("transformed")
