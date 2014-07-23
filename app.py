@@ -96,8 +96,9 @@ def write_dict_data_to_csv_file(dict_data, csv_file_path):
 
 # Real action here
 # Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
-input_path = "01-07-2014/Hectopunten/Hectopunten"  # of "01-07-2014/Wegvakken/Wegvakken"
+input_hectopunten = "01-07-2014/Hectopunten/Hectopunten"
+input_wegvakken = "01-07-2014/Wegvakken/Wegvakken"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
-shp_transform_to_different_projection(input_path, input_projection_string, output_projection_string, "Hectopunten.csv")
+shp_transform_to_different_projection(input_hectopunten, input_projection_string, output_projection_string, "output/Hectopunten.csv")
