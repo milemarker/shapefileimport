@@ -22,19 +22,6 @@ def shp_transform_to_different_projection(input_path, src_projection, dest_proje
 
     print "shapeType read: {}".format(r.shapeType)
 
-    # Create a shapefile writer using the same shape type as our reader
-    #w = shapefile.Writer(r.shapeType)
-
-    # Because every shape must have a corresponding record it is critical that
-    # the number of records equals the number of shapes to create a valid shapefile.
-    #w.autoBalance = 1
-
-    # Copy over the existing dbf fields
-    #w.fields = list(r.fields)
-
-    # Copy over the existing dbf records
-    #w.records.extend(r.records())
-
     # @DaanDebie: welke structuur zou de csv writer van python willen?
     # Zie: https://docs.python.org/2/library/csv.html#writer-objects
     result = []
@@ -51,9 +38,6 @@ def shp_transform_to_different_projection(input_path, src_projection, dest_proje
         #print field_names
         #print [str(i) for i in input_record]
 
-        # Add the translated point to the new shapefile (output) to save it
-        #w.point(x, y)
-
         # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
         result_entry = OrderedDict([
             ('HECTOMTRNG', input_record[0]),
@@ -64,9 +48,6 @@ def shp_transform_to_different_projection(input_path, src_projection, dest_proje
             ('latitude', y)
         ])
         result.append(result_entry)
-
-    # Save output file to new shapefile
-    #w.save("transformed")
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
