@@ -6,12 +6,12 @@ import csv
 from collections import OrderedDict
 
 
-def shp_transform_to_different_projection(file_name, src_projection, dest_projection):
-    r = shapefile.Reader(file_name)
+def shp_transform_to_different_projection(input_path, src_projection, dest_projection, output_filename):
+    r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
 
     nr_of_shapes_in_file = len(input_shapes)
-    print "{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_filename)
+    print "{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_path)
 
     # Show fields to verify input
     field_names = [str(i[0]) for i in r.fields]
@@ -60,11 +60,11 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
-    write_dict_data_to_csv_file("transformed.csv", result)
+    write_dict_data_to_csv_file(result, output_filename)
 
 
 # @DaanDebie: dit is een hacky mixup van online csv tutorials in een poging om csv writing werkend te krijgen, be warned.
-def write_dict_data_to_csv_file(csv_file_path, dict_data):
+def write_dict_data_to_csv_file(dict_data, csv_file_path):
     csv_file = open(csv_file_path, 'wb')
     writer = csv.writer(csv_file)
 
@@ -82,8 +82,8 @@ def write_dict_data_to_csv_file(csv_file_path, dict_data):
 
 # Real action here
 # Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
-input_filename = "01-07-2014/Hectopunten/Hectopunten"  # of "01-07-2014/Hectopunten/Hectopunten"
+input_path = "01-07-2014/Hectopunten/Hectopunten"  # of "01-07-2014/Wegvakken/Wegvakken"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
-shp_transform_to_different_projection(input_filename, input_projection_string, output_projection_string)
+shp_transform_to_different_projection(input_path, input_projection_string, output_projection_string, "Hectopunten.csv")
