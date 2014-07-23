@@ -1,7 +1,6 @@
 __author__ = 'djvdorp'
 import shapefile
 import pyproj
-
 import csv
 
 
@@ -51,24 +50,31 @@ def shp_transform_to_different_projection(file_name, src_projection, dest_projec
         #w.point(x, y)
 
         # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
-        result.append({'x': x, 'y': y})
+        result.append({'longitude': x, 'latitude': y})
 
     # Save output file to new shapefile
     #w.save("transformed")
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
-    csv_dict_writer("transformed.csv", ['x', 'y'], result)
+    write_dict_data_to_csv_file("transformed.csv", result)
 
 
 # @DaanDebie: dit is een hacky mixup van online csv tutorials in een poging om csv writing werkend te krijgen, be warned.
-def csv_dict_writer(path, fieldnames, data):
-    test_file = open(path,'wb')
-    csvwriter = csv.DictWriter(test_file, delimiter=',', fieldnames=fieldnames)
-    csvwriter.writerow(dict((fn,fn) for fn in fieldnames))
-    for row in data:
-         csvwriter.writerow(row)
-    test_file.close()
+def write_dict_data_to_csv_file(csv_file_path, dict_data):
+    csv_file = open(csv_file_path, 'wb')
+    writer = csv.writer(csv_file)
+
+    headers = dict_data[0].keys()
+    writer.writerow(headers)
+
+    for dat in dict_data:
+        line = []
+        for field in headers:
+            line.append(dat[field])
+        writer.writerow(line)
+
+    csv_file.close()
 
 
 # Real action here
