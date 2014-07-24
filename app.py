@@ -50,7 +50,7 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
 
             result_entry['longitude'] = x
             result_entry['latitude'] = y
-        
+
         result.append(result_entry)
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
@@ -65,7 +65,7 @@ def int_array_to_string(input_array):
 # @DaanDebie: dit is een hacky mixup van online csv tutorials in een poging om csv writing werkend te krijgen, be warned.
 def write_dict_data_to_csv_file(dict_data, csv_file_path):
     csv_file = open(csv_file_path, 'wb')
-    writer = csv.writer(csv_file)
+    writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
 
     headers = dict_data[0].keys()
     writer.writerow(headers)
