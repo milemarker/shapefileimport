@@ -4,6 +4,7 @@ import pyproj
 
 import csv
 from collections import OrderedDict
+import logging
 
 HECTOPUNTEN_FIELDS = OrderedDict([('HECTOMTRNG', 0), ('AFSTAND', 1), ('WVK_ID', 2), ('WVK_BEGDAT', 3)])
 
@@ -13,16 +14,16 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     input_shapes = r.shapeRecords()
 
     nr_of_shapes_in_file = len(input_shapes)
-    print "{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_path)
+    logging.debug("{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_path))
 
     # Show fields to verify input
     field_names = [str(i[0]) for i in r.fields]
-    print field_names
+    logging.debug(field_names)
 
     input_projection = pyproj.Proj(src_projection)
     output_projection = pyproj.Proj(dest_projection)
 
-    print "shapeType read: {}".format(r.shapeType)
+    logging.debug("shapeType read: {}".format(r.shapeType))
 
     # @DaanDebie: welke structuur zou de csv writer van python willen?
     # Zie: https://docs.python.org/2/library/csv.html#writer-objects
@@ -36,9 +37,10 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
         # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
         x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
 
-        #print 'Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y)
-        #print field_names
-        #print [str(i) for i in input_record]
+        logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
+
+        logging.debug(field_names)
+        logging.debug([str(i) for i in input_record])
 
         # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
         result_entry = OrderedDict()
