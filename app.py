@@ -6,25 +6,25 @@ import csv
 from collections import OrderedDict
 import logging
 
-HECTOPUNTEN_FIELDS = OrderedDict([('HECTOMTRNG', 0), ('AFSTAND', 1), ('WVK_ID', 2), ('WVK_BEGDAT', 3)])
+HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
 
     nr_of_shapes_in_file = len(input_shapes)
-    logging.debug("{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_path))
+    logging.info("{} shapes in file '{}' will be transformed".format(nr_of_shapes_in_file, input_path))
 
-    # Show fields to verify input
     field_names = [str(i[0]) for i in r.fields]
-    logging.debug(field_names)
+    field_names.remove('DeletionFlag')  # of moet dit zijn: del field_names[0]
+    logging.info("fieldNames in shapefile: {}".format(field_names))
 
     input_projection = pyproj.Proj(src_projection)
     output_projection = pyproj.Proj(dest_projection)
 
-    logging.debug("shapeType read: {}".format(r.shapeType))
+    logging.info("shapeType read: {}".format(r.shapeType))
 
     # @DaanDebie: welke structuur zou de csv writer van python willen?
     # Zie: https://docs.python.org/2/library/csv.html#writer-objects
@@ -38,17 +38,19 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
         # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
         x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
 
-        logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
-
         logging.debug(field_names)
         logging.debug([str(i) for i in input_record])
+        logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
 
         # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
         result_entry = OrderedDict()
-        for key, value in input_fields.items():
-            input_entry = input_record[value]
+        for input_field in input_fields:
+            key = (field_names.index(input_field))
+
+            input_entry = input_record[key]
             if isinstance(input_entry, list):
                 input_entry = int_array_to_string(input_entry)
+
             result_entry[key] = input_entry
 
             result_entry['longitude'] = x
@@ -89,5 +91,5 @@ input_wegvakken = "01-07-2014/Wegvakken/Wegvakken"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
-shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
+shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
 
