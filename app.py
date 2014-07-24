@@ -7,10 +7,12 @@ from collections import OrderedDict
 import logging
 
 HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
+WEGVAKKEN_OUTPUT_FIELDS = ['WVK_ID', 'WVK_BEGDAT', 'JTE_ID_BEG', 'JTE_ID_END', 'WEGBEHSRT', 'WEGNUMMER', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT', 'RPE_CODE', 'ADMRICHTNG', 'RIJRICHTNG', 'STT_NAAM', 'WPSNAAMNEN', 'GME_ID', 'GME_NAAM', 'HNRSTRLNKS', 'HNRSTRRHTS', 'E_HNR_LNKS', 'E_HNR_RHTS', 'L_HNR_LNKS', 'L_HNR_RHTS', 'BEGAFSTAND', 'ENDAFSTAND', 'BEGINKM', 'EINDKM', 'POS_TV_WOL']
 
 logging.basicConfig(level=logging.INFO)
 
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
+    logging.info("START processing shapefile '{}' to '{}'".format(input_path, output_filename))
     r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
 
@@ -51,16 +53,17 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             if isinstance(input_entry, list):
                 input_entry = int_array_to_string(input_entry)
 
-            result_entry[key] = input_entry
+            result_entry[input_field] = input_entry
 
-            result_entry['longitude'] = x
-            result_entry['latitude'] = y
+        result_entry['longitude'] = x
+        result_entry['latitude'] = y
 
         result.append(result_entry)
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
     write_dict_data_to_csv_file(result, output_filename)
+    logging.info("FINISHED processing - saved file '{}'".format(output_filename))
 
 
 def int_array_to_string(input_array):
@@ -92,4 +95,4 @@ input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New 
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
 shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
-
+#shp_transform_to_different_projection(input_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Wegvakken.csv")
