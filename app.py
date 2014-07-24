@@ -47,32 +47,37 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     result = []
 
     for input_shape in input_shapes:
-        input_x = input_shape.shape.points[0][0]
-        input_y = input_shape.shape.points[0][1]
-        input_record = input_shape.record
+        nr_of_points_in_shape = len(input_shape.shape.points)
 
-        # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
-        x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
+        if nr_of_points_in_shape == 1:
+            input_x = input_shape.shape.points[0][0]
+            input_y = input_shape.shape.points[0][1]
+            input_record = input_shape.record
 
-        logging.debug(field_names)
-        logging.debug([str(i) for i in input_record])
-        logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
+            # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
+            x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
 
-        # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
-        result_entry = OrderedDict()
-        for input_field in input_fields:
-            key = (field_names.index(input_field))
+            logging.debug(field_names)
+            logging.debug([str(i) for i in input_record])
+            logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
 
-            input_entry = input_record[key]
-            if isinstance(input_entry, list):
-                input_entry = int_array_to_string(input_entry)
+            # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
+            result_entry = OrderedDict()
+            for input_field in input_fields:
+                key = (field_names.index(input_field))
 
-            result_entry[input_field] = input_entry
+                input_entry = input_record[key]
+                if isinstance(input_entry, list):
+                    input_entry = int_array_to_string(input_entry)
 
-        result_entry['longitude'] = x
-        result_entry['latitude'] = y
+                result_entry[input_field] = input_entry
 
-        result.append(result_entry)
+            result_entry['longitude'] = x
+            result_entry['latitude'] = y
+
+            result.append(result_entry)
+        else:
+            logging.debug("number of points for this shape: {}".format(nr_of_points_in_shape))
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
