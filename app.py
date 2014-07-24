@@ -8,6 +8,7 @@ import logging
 
 HECTOPUNTEN_FIELDS = OrderedDict([('HECTOMTRNG', 0), ('AFSTAND', 1), ('WVK_ID', 2), ('WVK_BEGDAT', 3)])
 
+logging.basicConfig(level=logging.DEBUG)
 
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     r = shapefile.Reader(input_path)
