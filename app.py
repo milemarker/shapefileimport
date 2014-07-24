@@ -5,14 +5,19 @@ import pyproj
 import csv
 from collections import OrderedDict
 import logging
+import progressbar
 
 HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
 WEGVAKKEN_OUTPUT_FIELDS = ['WVK_ID', 'WVK_BEGDAT', 'JTE_ID_BEG', 'JTE_ID_END', 'WEGBEHSRT', 'WEGNUMMER', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT', 'RPE_CODE', 'ADMRICHTNG', 'RIJRICHTNG', 'STT_NAAM', 'WPSNAAMNEN', 'GME_ID', 'GME_NAAM', 'HNRSTRLNKS', 'HNRSTRRHTS', 'E_HNR_LNKS', 'E_HNR_RHTS', 'L_HNR_LNKS', 'L_HNR_RHTS', 'BEGAFSTAND', 'ENDAFSTAND', 'BEGINKM', 'EINDKM', 'POS_TV_WOL']
 
 logging.basicConfig(level=logging.INFO)
 
+widgets = ['Progress: ', progressbar.Percentage(), ' ', progressbar.Bar(marker=progressbar.RotatingMarker()),
+           ' ', progressbar.ETA(), ' ', progressbar.FileTransferSpeed()]
+
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     logging.info("START processing shapefile '{}' to '{}'".format(input_path, output_filename))
+
     r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
 
@@ -46,13 +51,27 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     # Zie: https://docs.python.org/2/library/csv.html#writer-objects
     result = []
 
+    counter = 0
+    pbar = progressbar.ProgressBar(widgets=widgets, maxval=nr_of_shapes_in_file).start()
+
     for input_shape in input_shapes:
         nr_of_points_in_shape = len(input_shape.shape.points)
+
+        # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
+        result_entry = OrderedDict()
+        for input_field in input_fields:
+            key = (field_names.index(input_field))
+
+            input_record = input_shape.record
+            input_entry = input_record[key]
+            if isinstance(input_entry, list):
+                input_entry = int_array_to_string(input_entry)
+
+            result_entry[input_field] = input_entry
 
         if nr_of_points_in_shape == 1:
             input_x = input_shape.shape.points[0][0]
             input_y = input_shape.shape.points[0][1]
-            input_record = input_shape.record
 
             # Convert input_x, input_y from Rijksdriehoekstelsel_New to WGS84
             x, y = pyproj.transform(input_projection, output_projection, input_x, input_y)
@@ -61,27 +80,20 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             logging.debug([str(i) for i in input_record])
             logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
 
-            # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
-            result_entry = OrderedDict()
-            for input_field in input_fields:
-                key = (field_names.index(input_field))
-
-                input_entry = input_record[key]
-                if isinstance(input_entry, list):
-                    input_entry = int_array_to_string(input_entry)
-
-                result_entry[input_field] = input_entry
-
             result_entry['longitude'] = x
             result_entry['latitude'] = y
-
-            result.append(result_entry)
         else:
             logging.debug("number of points for this shape: {}".format(nr_of_points_in_shape))
+
+        result.append(result_entry)
+
+        counter += 1
+        pbar.update(counter)
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
     write_dict_data_to_csv_file(result, output_filename)
+    pbar.finish()
     logging.info("FINISHED processing - saved file '{}'".format(output_filename))
 
 
@@ -114,4 +126,4 @@ input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New 
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
 shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
-shp_transform_to_different_projection(input_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Wegvakken.csv")
+#shp_transform_to_different_projection(input_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Wegvakken.csv")
