@@ -5,15 +5,14 @@ import pyproj
 import csv
 from collections import OrderedDict
 import logging
-import progressbar
+from progressbar import Percentage, ProgressBar, Bar, RotatingMarker, ETA
 
 HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
 WEGVAKKEN_OUTPUT_FIELDS = ['WVK_ID', 'WVK_BEGDAT', 'JTE_ID_BEG', 'JTE_ID_END', 'WEGBEHSRT', 'WEGNUMMER', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT', 'RPE_CODE', 'ADMRICHTNG', 'RIJRICHTNG', 'STT_NAAM', 'WPSNAAMNEN', 'GME_ID', 'GME_NAAM', 'HNRSTRLNKS', 'HNRSTRRHTS', 'E_HNR_LNKS', 'E_HNR_RHTS', 'L_HNR_LNKS', 'L_HNR_RHTS', 'BEGAFSTAND', 'ENDAFSTAND', 'BEGINKM', 'EINDKM', 'POS_TV_WOL']
 
 logging.basicConfig(level=logging.INFO)
 
-widgets = ['Progress: ', progressbar.Percentage(), ' ', progressbar.Bar(marker=progressbar.RotatingMarker()),
-           ' ', progressbar.ETA(), ' ', progressbar.FileTransferSpeed()]
+widgets = ['Processing: ', Percentage(), ' ', Bar(marker=RotatingMarker()), ' ', ETA()]
 
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     logging.info("START processing shapefile '{}' to '{}'".format(input_path, output_filename))
@@ -52,7 +51,7 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     result = []
 
     counter = 0
-    pbar = progressbar.ProgressBar(widgets=widgets, maxval=nr_of_shapes_in_file).start()
+    pbar = ProgressBar(widgets=widgets, maxval=nr_of_shapes_in_file).start()
 
     for input_shape in input_shapes:
         nr_of_points_in_shape = len(input_shape.shape.points)
