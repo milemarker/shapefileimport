@@ -26,6 +26,20 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     input_projection = pyproj.Proj(src_projection)
     output_projection = pyproj.Proj(dest_projection)
 
+    # shapefile.NULL = 0
+    # shapefile.POINT = 1
+    # shapefile.POLYLINE = 3
+    # shapefile.POLYGON = 5
+    # shapefile.MULTIPOINT = 8
+    # shapefile.POINTZ = 11
+    # shapefile.POLYLINEZ = 13
+    # shapefile.POLYGONZ = 15
+    # shapefile.MULTIPOINTZ = 18
+    # shapefile.POINTM = 21
+    # shapefile.POLYLINEM = 23
+    # shapefile.POLYGONM = 25
+    # shapefile.MULTIPOINTM = 28
+    # shapefile.MULTIPATCH = 31
     logging.info("shapeType read: {}".format(r.shapeType))
 
     # @DaanDebie: welke structuur zou de csv writer van python willen?
