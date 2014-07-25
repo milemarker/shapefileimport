@@ -109,23 +109,6 @@ def int_array_to_string(input_array):
     return "-".join(str(i) for i in input_array)
 
 
-# @DaanDebie: dit is een hacky mixup van online csv tutorials in een poging om csv writing werkend te krijgen, be warned.
-def write_dict_data_to_csv_file(dict_data, csv_file_path):
-    csv_file = open(csv_file_path, 'wb')
-    writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-
-    headers = dict_data[0].keys()
-    writer.writerow(headers)
-
-    for dat in dict_data:
-        line = []
-        for field in headers:
-            line.append(dat[field])
-        writer.writerow(line)
-
-    csv_file.close()
-
-
 # Real action here
 # Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
 input_hectopunten = "01-07-2014/Hectopunten/Hectopunten"
