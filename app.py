@@ -49,16 +49,12 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     # shapefile.MULTIPATCH = 31
     logging.info("shapeType read: {}".format(r.shapeType))
 
-    # @DaanDebie: welke structuur zou de csv writer van python willen?
-    # Zie: https://docs.python.org/2/library/csv.html#writer-objects
-
     counter = 0
     pbar = ProgressBar(widgets=widgets, maxval=nr_of_shapes_in_file).start()
 
     for input_shape in input_shapes:
         nr_of_points_in_shape = len(input_shape.shape.points)
 
-        # @DaanDebie: in plaats van weer opslaan in een shapefile, wil ik het hier in de csv stoppen, maar dit lijkt me zo wat omslachtig?
         result_entry = OrderedDict()
         for input_field in input_fields:
             key = (field_names.index(input_field))
@@ -98,8 +94,6 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
         counter += 1
         pbar.update(counter)
 
-    # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
-    # Ze zijn immers ook in de entries van result (result.append() bekend?
     csv_file.close()
     pbar.finish()
     logging.info("FINISHED processing - saved file '{}'".format(output_filename))
