@@ -17,6 +17,9 @@ widgets = ['Processing: ', Percentage(), ' ', Bar(marker=RotatingMarker()), ' ',
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     logging.info("START processing shapefile '{}' to '{}'".format(input_path, output_filename))
 
+    csv_file = open(output_filename, 'wb')
+    writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+
     r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
 
@@ -48,7 +51,6 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
 
     # @DaanDebie: welke structuur zou de csv writer van python willen?
     # Zie: https://docs.python.org/2/library/csv.html#writer-objects
-    result = []
 
     counter = 0
     pbar = ProgressBar(widgets=widgets, maxval=nr_of_shapes_in_file).start()
@@ -84,14 +86,21 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
         else:
             logging.debug("number of points for this shape: {}".format(nr_of_points_in_shape))
 
-        result.append(result_entry)
+        headers = result_entry.keys()
+        if counter == 0:
+            writer.writerow(headers)
+
+        line = []
+        for field in headers:
+            line.append(result_entry[field])
+        writer.writerow(line)
 
         counter += 1
         pbar.update(counter)
 
     # @DaanDebie: hier geef ik, als 2e parameter, los nogmaals aan welke 'fieldnames' ik in de csv wil. Dat moet ook makkelijker kunnen toch?
     # Ze zijn immers ook in de entries van result (result.append() bekend?
-    write_dict_data_to_csv_file(result, output_filename)
+    csv_file.close()
     pbar.finish()
     logging.info("FINISHED processing - saved file '{}'".format(output_filename))
 
@@ -125,4 +134,4 @@ input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New 
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
 shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
-#shp_transform_to_different_projection(input_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Wegvakken.csv")
+shp_transform_to_different_projection(input_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Wegvakken.csv")
