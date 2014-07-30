@@ -61,8 +61,14 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
 
             input_record = input_shape.record
             input_entry = input_record[key]
+
+            # Lists (voor datum) platslaan tot een string
             if isinstance(input_entry, list):
                 input_entry = int_array_to_string(input_entry)
+
+            # HECTOMTRNG moet gedeeld worden door 10
+            if input_field == 'HECTOMTRNG':
+                input_entry = (input_record[key] / 10.)
 
             result_entry[input_field] = input_entry
 
@@ -77,8 +83,8 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             logging.debug([str(i) for i in input_record])
             logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
 
-            result_entry['longitude'] = x
-            result_entry['latitude'] = y
+            result_entry['LONGITUDE'] = x
+            result_entry['LATITUDE'] = y
         else:
             logging.debug("number of points for this shape: {}".format(nr_of_points_in_shape))
 
