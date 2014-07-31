@@ -1,14 +1,17 @@
 __author__ = 'djvdorp'
+from collections import OrderedDict
+from progressbar import *
+
 import shapefile
 import pyproj
-
 import csv
-from collections import OrderedDict
 import logging
-from progressbar import *
+import pandas
 
 HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
 WEGVAKKEN_OUTPUT_FIELDS = ['WVK_ID', 'WVK_BEGDAT', 'JTE_ID_BEG', 'JTE_ID_END', 'WEGBEHSRT', 'WEGNUMMER', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT', 'RPE_CODE', 'ADMRICHTNG', 'RIJRICHTNG', 'STT_NAAM', 'WPSNAAMNEN', 'GME_ID', 'GME_NAAM', 'HNRSTRLNKS', 'HNRSTRRHTS', 'E_HNR_LNKS', 'E_HNR_RHTS', 'L_HNR_LNKS', 'L_HNR_RHTS', 'BEGAFSTAND', 'ENDAFSTAND', 'BEGINKM', 'EINDKM', 'POS_TV_WOL']
+
+MERGED_OUTPUT_FIELDS = ['ID', 'HECTOMTRNG', 'LONGITUDE', 'LATITUDE', 'STT_NAAM', 'GME_NAAM', 'WEGBEHSRT', 'RPE_CODE', 'POS_TV_WOL', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT']
 
 logging.basicConfig(level=logging.INFO)
 
@@ -109,12 +112,34 @@ def int_array_to_string(input_array):
     return "-".join(str(i) for i in input_array)
 
 
+def merge_shapefiles(input_hectopunten, input_wegvakken, merge_on_field, fields_to_keep, output_filename):
+    hectopunten_df = pandas.read_csv(input_hectopunten)
+    wegvakken_df = pandas.read_csv(input_wegvakken)
+
+    merged_df = pandas.merge(hectopunten_df, wegvakken_df, on=merge_on_field)
+    merged_df['ID'] = merged_df.index
+
+    result_df = merged_df[fields_to_keep]
+
+    result_df.to_csv(output_filename, mode='wb', index=False, header=True, quoting=csv.QUOTE_NONNUMERIC)
+
+
 # Real action here
-# Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
-input_hectopunten = "input/Hectopunten/Hectopunten"
-input_wegvakken = "input/Wegvakken/Wegvakken"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
-shp_transform_to_different_projection(input_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Hectopunten.csv")
-shp_transform_to_different_projection(input_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, "output/Wegvakken.csv")
+# Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
+shp_hectopunten = "input/Hectopunten/Hectopunten"
+shp_wegvakken = "input/Wegvakken/Wegvakken"
+
+# CSV files van de SHP files
+csv_hectopunten = "output/Hectopunten.csv"
+csv_wegvakken = "output/Wegvakken.csv"
+
+# CSV output na mergen
+csv_merged = "output/merged.csv"
+
+shp_transform_to_different_projection(shp_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, csv_hectopunten)
+shp_transform_to_different_projection(shp_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, csv_wegvakken)
+
+merge_shapefiles(csv_hectopunten, csv_wegvakken, 'WVK_ID', MERGED_OUTPUT_FIELDS, csv_merged)
