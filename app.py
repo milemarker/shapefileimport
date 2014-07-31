@@ -11,7 +11,8 @@ import pandas
 HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
 WEGVAKKEN_OUTPUT_FIELDS = ['WVK_ID', 'WVK_BEGDAT', 'JTE_ID_BEG', 'JTE_ID_END', 'WEGBEHSRT', 'WEGNUMMER', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT', 'RPE_CODE', 'ADMRICHTNG', 'RIJRICHTNG', 'STT_NAAM', 'WPSNAAMNEN', 'GME_ID', 'GME_NAAM', 'HNRSTRLNKS', 'HNRSTRRHTS', 'E_HNR_LNKS', 'E_HNR_RHTS', 'L_HNR_LNKS', 'L_HNR_RHTS', 'BEGAFSTAND', 'ENDAFSTAND', 'BEGINKM', 'EINDKM', 'POS_TV_WOL']
 
-MERGED_OUTPUT_FIELDS = ['ID', 'HECTOMTRNG', 'LONGITUDE', 'LATITUDE', 'STT_NAAM', 'GME_NAAM', 'WEGBEHSRT', 'RPE_CODE', 'POS_TV_WOL', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT']
+MERGED_OUTPUT_FIELDS = ['ID', 'WEGNUMMER', 'HECTOMTRNG', 'LONGITUDE', 'LATITUDE', 'STT_NAAM', 'GME_NAAM', 'WEGBEHSRT', 'RPE_CODE', 'POS_TV_WOL', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT']
+MERGED_RENAME_FIELDS_MAPPING = {'ID': 'HP_ID', 'WEGNUMMER': 'WEGNR','HECTOMTRNG': 'HECTONR'}
 
 logging.basicConfig(level=logging.INFO)
 
@@ -100,7 +101,7 @@ def int_array_to_string(input_array):
     return "-".join(str(i) for i in input_array)
 
 
-def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fields_to_keep, output_filename):
+def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fields_to_keep, fields_rename_mapping, output_filename):
     hectopunten_df = pandas.read_csv(input_hectopunten)
     wegvakken_df = pandas.read_csv(input_wegvakken)
 
@@ -111,6 +112,9 @@ def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fie
 
     # Bewaar alleen de meegegeven velden om te bewaren
     result_df = merged_df[fields_to_keep]
+
+    # Hernoem columns zodat deze af kunnen wijken van de input columns
+    result_df = result_df.rename(columns=fields_rename_mapping)
 
     # Exporteer dit naar een merged csv
     result_df.to_csv(output_filename, mode='wb', index=False, header=True, quoting=csv.QUOTE_NONNUMERIC)
@@ -134,4 +138,4 @@ csv_merged = "output/merged.csv"
 shp_transform_to_different_projection(shp_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, csv_hectopunten)
 shp_transform_to_different_projection(shp_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, csv_wegvakken)
 
-merge_shapefile_csvs(csv_hectopunten, csv_wegvakken, 'WVK_ID', MERGED_OUTPUT_FIELDS, csv_merged)
+merge_shapefile_csvs(csv_hectopunten, csv_wegvakken, 'WVK_ID', MERGED_OUTPUT_FIELDS, MERGED_RENAME_FIELDS_MAPPING, csv_merged)
