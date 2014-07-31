@@ -1,3 +1,4 @@
+pandas==0.14.1
 progressbar==2.2
 pyproj==1.9.3
 pyshp==1.2.1
