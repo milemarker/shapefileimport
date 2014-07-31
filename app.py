@@ -111,8 +111,8 @@ def int_array_to_string(input_array):
 
 # Real action here
 # Bestanden kunnen worden gevonden op: http://www.jigsaw.nl/nwb/downloads/NWB_01-07-2014.zip
-input_hectopunten = "01-07-2014/Hectopunten/Hectopunten"
-input_wegvakken = "01-07-2014/Wegvakken/Wegvakken"
+input_hectopunten = "input/Hectopunten/Hectopunten"
+input_wegvakken = "input/Wegvakken/Wegvakken"
 input_projection_string = "+init=EPSG:28992"  # Dit is Rijksdriehoekstelsel_New vanuit de .prj files, officieel EPSG:28992 Amersfoort / RD New
 output_projection_string = "+init=EPSG:4326"  # LatLon with WGS84 datum used by GPS units and Google Earth, officieel EPSG:4326
 
