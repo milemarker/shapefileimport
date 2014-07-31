@@ -112,15 +112,19 @@ def int_array_to_string(input_array):
     return "-".join(str(i) for i in input_array)
 
 
-def merge_shapefiles(input_hectopunten, input_wegvakken, merge_on_field, fields_to_keep, output_filename):
+def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fields_to_keep, output_filename):
     hectopunten_df = pandas.read_csv(input_hectopunten)
     wegvakken_df = pandas.read_csv(input_wegvakken)
 
+    # Join de 2 input files samen, left=hectopunten en right=wegvakken
     merged_df = pandas.merge(hectopunten_df, wegvakken_df, on=merge_on_field)
+    # Voeg een ID field toe per regel
     merged_df['ID'] = merged_df.index
 
+    # Bewaar alleen de meegegeven velden om te bewaren
     result_df = merged_df[fields_to_keep]
 
+    # Exporteer dit naar een merged csv
     result_df.to_csv(output_filename, mode='wb', index=False, header=True, quoting=csv.QUOTE_NONNUMERIC)
 
 
@@ -142,4 +146,4 @@ csv_merged = "output/merged.csv"
 shp_transform_to_different_projection(shp_hectopunten, HECTOPUNTEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, csv_hectopunten)
 shp_transform_to_different_projection(shp_wegvakken, WEGVAKKEN_OUTPUT_FIELDS, input_projection_string, output_projection_string, csv_wegvakken)
 
-merge_shapefiles(csv_hectopunten, csv_wegvakken, 'WVK_ID', MERGED_OUTPUT_FIELDS, csv_merged)
+merge_shapefile_csvs(csv_hectopunten, csv_wegvakken, 'WVK_ID', MERGED_OUTPUT_FIELDS, csv_merged)
