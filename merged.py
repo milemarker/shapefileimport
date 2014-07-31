@@ -23,4 +23,4 @@ result_df = merged_df[
      'BAANSUBSRT']
 ]
 
-result_df.to_csv('output/merged.csv', index=False, header=True, quoting=csv.QUOTE_NONNUMERIC)
+result_df.to_csv('output/merged.csv', mode='wb', index=False, header=True, quoting=csv.QUOTE_NONNUMERIC)
