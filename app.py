@@ -78,7 +78,7 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             result_entry['LONGITUDE'] = x
             result_entry['LATITUDE'] = y
         else:
-            logging.debug("number of points for this shape: {}".format(nr_of_points_in_shape))
+            logging.debug("number of points for this shape was >1, it was: {}".format(nr_of_points_in_shape))
 
         headers = result_entry.keys()
         if counter == 0:
