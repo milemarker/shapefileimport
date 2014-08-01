@@ -58,7 +58,7 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             if isinstance(input_entry, list):
                 input_entry = int_array_to_string(input_entry)
 
-            # HECTOMTRNG moet gedeeld worden door 10
+            # HECTOMTRNG in Hectopunten.shp moet gedeeld worden door 10
             if input_field == 'HECTOMTRNG':
                 input_entry = (input_record[key] / 10.)
 
