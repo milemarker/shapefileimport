@@ -1,12 +1,12 @@
 __author__ = 'djvdorp'
 from collections import OrderedDict
 from progressbar import *
+from pandas import *
 
 import shapefile
 import pyproj
 import csv
 import logging
-import pandas
 
 HECTOPUNTEN_OUTPUT_FIELDS = ['HECTOMTRNG', 'AFSTAND', 'WVK_ID', 'WVK_BEGDAT']
 WEGVAKKEN_OUTPUT_FIELDS = ['WVK_ID', 'WVK_BEGDAT', 'JTE_ID_BEG', 'JTE_ID_END', 'WEGBEHSRT', 'WEGNUMMER', 'WEGDEELLTR', 'HECTO_LTTR', 'BAANSUBSRT', 'RPE_CODE', 'ADMRICHTNG', 'RIJRICHTNG', 'STT_NAAM', 'WPSNAAMNEN', 'GME_ID', 'GME_NAAM', 'HNRSTRLNKS', 'HNRSTRRHTS', 'E_HNR_LNKS', 'E_HNR_RHTS', 'L_HNR_LNKS', 'L_HNR_RHTS', 'BEGAFSTAND', 'ENDAFSTAND', 'BEGINKM', 'EINDKM', 'POS_TV_WOL']
@@ -20,9 +20,6 @@ widgets = ['Processing: ', Percentage(), ' ', Bar(marker=RotatingMarker()), ' ',
 
 def shp_transform_to_different_projection(input_path, input_fields, src_projection, dest_projection, output_filename):
     logging.info("START processing shapefile '{}' to '{}'".format(input_path, output_filename))
-
-    csv_file = open(output_filename, 'wb')
-    writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
 
     r = shapefile.Reader(input_path)
     input_shapes = r.shapeRecords()
@@ -47,7 +44,7 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
     for input_shape in input_shapes:
         nr_of_points_in_shape = len(input_shape.shape.points)
 
-        result_entry = OrderedDict()
+        result_df = DataFrame()
         for input_field in input_fields:
             key = (field_names.index(input_field))
 
@@ -62,7 +59,7 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             if input_field == 'HECTOMTRNG':
                 input_entry = (input_record[key] / 10.)
 
-            result_entry[input_field] = input_entry
+            result_df[input_field] = input_entry
 
         if nr_of_points_in_shape == 1:
             input_x = input_shape.shape.points[0][0]
@@ -75,24 +72,21 @@ def shp_transform_to_different_projection(input_path, input_fields, src_projecti
             logging.debug([str(i) for i in input_record])
             logging.debug('Rijksdriehoekstelsel_New ({:-f}, {:-f}) becomes WGS84 ({:-f}, {:-f})'.format(input_x, input_y, x, y))
 
-            result_entry['LONGITUDE'] = x
-            result_entry['LATITUDE'] = y
+            result_df['LONGITUDE'] = x
+            result_df['LATITUDE'] = y
         else:
             logging.debug("number of points for this shape: {}".format(nr_of_points_in_shape))
 
-        headers = result_entry.keys()
         if counter == 0:
-            writer.writerow(headers)
-
-        line = []
-        for field in headers:
-            line.append(result_entry[field])
-        writer.writerow(line)
+            result_df.to_csv(output_filename, mode='a', index=False, header=True,
+                             delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+        else:
+            result_df.to_csv(output_filename, mode='a', index=False, header=False,
+                             delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
 
         counter += 1
         pbar.update(counter)
 
-    csv_file.close()
     pbar.finish()
     logging.info("FINISHED processing - saved file '{}'".format(output_filename))
 
@@ -117,7 +111,8 @@ def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fie
     result_df = result_df.rename(columns=fields_rename_mapping)
 
     # Exporteer dit naar een merged csv
-    result_df.to_csv(output_filename, mode='wb', index=False, header=True, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+    result_df.to_csv(output_filename, mode='wb', index=False, header=True,
+                     delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
 
 
 # Real action here
