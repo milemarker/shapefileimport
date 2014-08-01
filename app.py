@@ -117,7 +117,7 @@ def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fie
     result_df = result_df.rename(columns=fields_rename_mapping)
 
     # Exporteer dit naar een merged csv
-    result_df.to_csv(output_filename, mode='wb', index=False, header=True, quoting=csv.QUOTE_NONNUMERIC)
+    result_df.to_csv(output_filename, mode='wb', index=False, header=True, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
 
 
 # Real action here
