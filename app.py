@@ -102,6 +102,7 @@ def int_array_to_string(input_array):
 
 
 def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fields_to_keep, fields_rename_mapping, output_filename):
+    logging.info("START merging csv files '{}' and '{}' to file '{}'".format(input_hectopunten, input_wegvakken, output_filename))
     hectopunten_df = pandas.read_csv(input_hectopunten)
     wegvakken_df = pandas.read_csv(input_wegvakken)
 
@@ -118,6 +119,7 @@ def merge_shapefile_csvs(input_hectopunten, input_wegvakken, merge_on_field, fie
 
     # Exporteer dit naar een merged csv
     result_df.to_csv(output_filename, mode='wb', index=False, header=True, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+    logging.info("FINISHED merging csv files - saved file '{}'".format(output_filename))
 
 
 # Real action here
